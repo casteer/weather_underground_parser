@@ -14,6 +14,7 @@ class weather_underground_parser:
 
         self.location_string = loc_string
 
+        self.temperature = [];
         self.pressure = [];
         self.relative_humidity = [];
         self.datetime = [];
@@ -37,11 +38,7 @@ class weather_underground_parser:
                 self.extract_pressure(self.html_table);
                 self.extract_datetimes(self.html_table);
                 self.extract_relative_humidity(self.html_table)
-
-    def parse_url(self, url):
-        response = requests.get(url)
-        soup = BeautifulSoup(response.text, 'lxml')
-        return [(table['id'],self.parse_html_table(table)) for table in soup.find_all('table')]
+                self.extract_temperatures(self.html_table)
 
     def parse_weather_underground(self, date_time):
 
@@ -62,6 +59,18 @@ class weather_underground_parser:
         table = self.parse_html_table(soup.find_all("table")[4])
         self.html_table = table
 
+
+    def extract_temperatures(self,table):
+        temperatures = []
+
+        # Loop over each line in the table
+        for p in table.as_matrix():
+
+            # This is the temperature value as a string
+            new_temperature_value = p[1].split()[0]
+            temperatures.append(float(new_temperature_value))
+
+        self.temperature.extend(temperatures)
 
     def extract_relative_humidity(self,table):
         rel_humid = []
