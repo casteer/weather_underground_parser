@@ -8,6 +8,9 @@ from bs4 import BeautifulSoup
 import datetime
 from datetime import timedelta
 
+# Needed to stop "max retries exceeded" error
+from time import sleep
+
 class weather_underground_parser:
 
     # default location is Heathrow
@@ -54,12 +57,21 @@ class weather_underground_parser:
         self.day = date_time.day
 
         base_url += str(self.year) + "/" + str(self.month) + "/" + str(self.day) + "/DailyHistory.html?req_city=Twickenham&req_state=GLA&req_statename=United%20Kingdom&reqdb.zip=00000&reqdb.magic=57&reqdb.wmo=03772"
-        response = requests.get(base_url)
+        response=''
+        while response=='':
+            try:
+                response = requests.get(base_url)
+            except:
+                print("Connection refused... waiting 5 seconds... ")
+                time.sleep(5)
+                continue
+
         soup = BeautifulSoup(response.text, 'lxml')
 
         # Get the right hourly table
         table = self.parse_html_table(soup.find_all("table")[4])
         self.html_table = table
+
 
 
     def extract_temperatures(self,table):
