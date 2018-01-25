@@ -73,7 +73,7 @@ class weather_underground_parser:
             try:
                 temperatures.append(float(new_temperature_value))
             except:
-                temperatures.append(10000.0)
+                temperatures.append(float('nan'))
 
         self.temperature.extend(temperatures)
 
@@ -85,11 +85,12 @@ class weather_underground_parser:
 
             # This is the rh value as a string in %
             new_rh_value = p[4].split()[0]
+
             # It has the % at the end so remove this
             try:
                 rel_humid.append(float(new_rh_value[:-1]))
             except:
-                rel_humid.append(-1.0)
+                rel_humid.append(float('nan'))
 
         self.relative_humidity.extend(rel_humid)
 
@@ -118,9 +119,9 @@ class weather_underground_parser:
                 if(new_pressure_value.isdigit()):
                     pressure_data.append(float(new_pressure_value))
                 else:
-                    pressure_data.append(0)
+                    pressure_data.append(float('nan'))
             except:
-                pressure_data.append(0)
+                pressure_data.append(float('nan'))
 
         # Save the pressure data into the class variable
         self.pressure.extend(pressure_data)
