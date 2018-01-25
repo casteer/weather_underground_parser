@@ -3,6 +3,7 @@
 
 import requests
 import pandas as pd
+import numpy as np
 from bs4 import BeautifulSoup
 import datetime
 from datetime import timedelta
@@ -18,6 +19,7 @@ class weather_underground_parser:
         self.pressure = [];
         self.relative_humidity = [];
         self.datetime = [];
+        self.epochtime = [];
         self.precipitation = [];
         self.humidity = [];
 
@@ -85,6 +87,18 @@ class weather_underground_parser:
 
         self.relative_humidity.extend(rel_humid)
 
+    # Returns an interpolated pressure for the given datetime
+    def get_pressure(self,interp_datetime):
+        # Convert the given datetime to epoch time
+        this_epoch_time = (interp_datetime - datetime.datetime(1970,1,1)).total_seconds()
+
+        # Interpolate
+        return np.interp(this_epoch_time,np.asarray(self.epochtime),np.asarray(self.pressure))
+
+
+
+
+
     def extract_pressure(self,table):
         pressure_data = []
 
@@ -106,6 +120,7 @@ class weather_underground_parser:
     def extract_datetimes(self,table):
 
         time_data = [];
+        epoch_times = []
         for p in table.as_matrix():
             # Get the hour and whether its am or pm
             new_hour_value = p[0].split()[0]
@@ -117,9 +132,10 @@ class weather_underground_parser:
             format = '%Y-%m-%d %I:%M %p'
             table_datetime = datetime.datetime.strptime(date_string,format)
             time_data.append(table_datetime)
+            epoch_times.append((table_datetime - datetime.datetime(1970,1,1)).total_seconds())
 
         self.datetime.extend(time_data)
-
+        self.epochtime.extend(epoch_times)
 
     def parse_html_table(self, table):
         n_columns = 0
